@@ -1,0 +1,11 @@
+{% extends 'juegos/base.html' %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-6 text-center">
+        <h1 class="display-4 mb-4">¡Bienvenido a los Juegos Educativos!</h1>
+        <p class="lead mb-5">Aprende divirtiéndote con nuestros juegos interactivos</p>
+        <a href="{% url 'menu_juegos' %}" class="btn btn-primary btn-lg btn-start">Empezar a Jugar</a>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,46 @@
+{% extends 'juegos/base.html' %}
+
+{% block content %}
+<div class="text-center mb-5">
+    <h1 class="display-4">Elige un Juego</h1>
+    <p class="lead">Selecciona el juego que quieres jugar</p>
+</div>
+
+<div class="row row-cols-1 row-cols-md-3 g-4">
+    
+    <div class="col">
+        <a href="{% url 'sopa_letras' %}" class="text-decoration-none">
+            <div class="card game-card bg-primary text-white h-100">
+                <div class="card-body text-center d-flex flex-column justify-content-center">
+                    <h2 class="card-title">Sopa de Letras</h2>
+                    <p class="mb-0">Encuentra las palabras ocultas</p>
+                </div>
+            </div>
+        </a>
+    </div>
+
+  
+    <div class="col">
+        <a href="{% url 'dictado' %}" class="text-decoration-none">
+            <div class="card game-card bg-success text-white h-100">
+                <div class="card-body text-center d-flex flex-column justify-content-center">
+                    <h2 class="card-title">Dictado</h2>
+                    <p class="mb-0">Escribe lo que escuches</p>
+                </div>
+            </div>
+        </a>
+    </div>
+
+   
+    <div class="col">
+        <a href="{% url 'palabras' %}" class="text-decoration-none">
+            <div class="card game-card bg-info text-white h-100">
+                <div class="card-body text-center d-flex flex-column justify-content-center">
+                    <h2 class="card-title">Palabras</h2>
+                    <p class="mb-0">Forma palabras con letras</p>
+                </div>
+            </div>
+        </a>
+    </div>
+</div>
+{% endblock %}

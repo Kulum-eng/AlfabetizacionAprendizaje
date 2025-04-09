@@ -1,0 +1,186 @@
+{% extends 'juegos/base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container">
+    <h1 class="text-center my-4">Juego de Dictado</h1>
+    
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card mb-4">
+                <div class="card-header bg-success text-white">
+                    <h3 class="mb-0">Selecciona la frase que escuches</h3>
+                </div>
+                <div class="card-body">
+                    <div class="text-center mb-4">
+                        <button id="escuchar-btn" class="btn btn-primary btn-lg">
+                            <i class="fas fa-volume-up"></i> Escuchar Frase
+                        </button>
+                        <button id="repetir-btn" class="btn btn-secondary btn-lg ml-2">
+                            <i class="fas fa-redo"></i> Repetir
+                        </button>
+                    </div>
+                    
+                    <div id="opciones-container" class="text-center mt-4">
+                        
+                    </div>
+                    
+                    <div id="resultado" class="mt-4 p-3 bg-light rounded text-center" style="display:none;">
+                        <p id="mensaje-resultado" class="h4"></p>
+                        <button id="siguiente-btn" class="btn btn-info btn-lg mt-3">Siguiente Frase</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  
+    const bancoFrases = [
+        "La casa es amarilla",
+        "El perro corre rápido",
+        "Mi mamá cocina rico",
+        "El sol brilla fuerte",
+        "Los niños juegan felices",
+        "El agua está fría",
+        "Tengo un gato pequeño",
+        "La flor es bonita",
+        "Como pan tostado",
+        "Vivo en una ciudad"
+    ];
+    
+    let fraseActual = "";
+    let opciones = [];
+    let respuestaCorrecta = "";
+    
+    const escucharBtn = document.getElementById('escuchar-btn');
+    const repetirBtn = document.getElementById('repetir-btn');
+    const siguienteBtn = document.getElementById('siguiente-btn');
+    const opcionesContainer = document.getElementById('opciones-container');
+    const resultadoDiv = document.getElementById('resultado');
+    const mensajeResultadoP = document.getElementById('mensaje-resultado');
+
+ 
+    cargarNuevaPregunta();
+    
+    function cargarNuevaPregunta() {
+       
+        opcionesContainer.innerHTML = '';
+        resultadoDiv.style.display = 'none';
+        
+        const indiceCorrecto = Math.floor(Math.random() * bancoFrases.length);
+        respuestaCorrecta = bancoFrases[indiceCorrecto];
+        fraseActual = respuestaCorrecta;
+        
+        opciones = [respuestaCorrecta];
+        
+        while(opciones.length < 3) {
+            const indiceAleatorio = Math.floor(Math.random() * bancoFrases.length);
+            const posibleOpcion = bancoFrases[indiceAleatorio];
+            if(!opciones.includes(posibleOpcion)) {
+                opciones.push(posibleOpcion);
+            }
+        }
+        
+       
+        opciones = opciones.sort(() => Math.random() - 0.5);
+        
+       
+        opciones.forEach((opcion, index) => {
+            const botonOpcion = document.createElement('button');
+            botonOpcion.className = 'btn btn-outline-primary btn-option btn-lg m-2';
+            botonOpcion.textContent = opcion;
+            botonOpcion.dataset.opcion = opcion;
+            botonOpcion.addEventListener('click', verificarRespuesta);
+            opcionesContainer.appendChild(botonOpcion);
+        });
+        
+        leerFrase();
+    }
+    
+    function leerFrase() {
+        if ('speechSynthesis' in window) {
+            speechSynthesis.cancel();
+            const utterance = new SpeechSynthesisUtterance(fraseActual);
+            utterance.lang = 'es-ES';
+            utterance.rate = 0.9; 
+            speechSynthesis.speak(utterance);
+        } else {
+            alert('Lo siento, tu navegador no soporta la síntesis de voz.');
+        }
+    }
+
+    function verificarRespuesta(e) {
+        const opcionSeleccionada = e.target.dataset.opcion;
+        
+        
+        document.querySelectorAll('.btn-option').forEach(boton => {
+            boton.disabled = true;
+            
+            
+            if(boton.dataset.opcion === respuestaCorrecta) {
+                boton.classList.remove('btn-outline-primary');
+                boton.classList.add('btn-success');
+            } else if(boton.dataset.opcion === opcionSeleccionada && opcionSeleccionada !== respuestaCorrecta) {
+                boton.classList.remove('btn-outline-primary');
+                boton.classList.add('btn-danger');
+            }
+        });
+        
+       
+        resultadoDiv.style.display = 'block';
+        
+        if(opcionSeleccionada === respuestaCorrecta) {
+            mensajeResultadoP.textContent = '¡Correcto! Muy bien hecho.';
+            mensajeResultadoP.className = 'h4 text-success';
+            
+           
+            const audio = new Audio("{% static 'sounds/success.mp3' %}");
+            audio.play().catch(e => console.log("Error al reproducir audio:", e));
+        } else {
+            mensajeResultadoP.textContent = `Respuesta incorrecta. La frase era: "${respuestaCorrecta}"`;
+            mensajeResultadoP.className = 'h4 text-danger';
+        }
+    }
+
+   
+    escucharBtn.addEventListener('click', leerFrase);
+    repetirBtn.addEventListener('click', leerFrase);
+    siguienteBtn.addEventListener('click', cargarNuevaPregunta);
+});
+</script>
+
+<style>
+    .btn-lg {
+        padding: 10px 20px;
+        font-size: 1.1rem;
+        min-width: 200px;
+    }
+    
+    .btn-option {
+        transition: all 0.3s;
+    }
+    
+    .btn-option:hover {
+        transform: scale(1.05);
+    }
+    
+    #resultado {
+        transition: all 0.5s;
+    }
+    
+    .text-success {
+        color: #28a745 !important;
+        font-weight: bold;
+    }
+    
+    .text-danger {
+        color: #dc3545 !important;
+        font-weight: bold;
+    }
+</style>
+{% endblock %}

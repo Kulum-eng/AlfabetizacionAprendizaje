@@ -1,0 +1,234 @@
+{% extends 'juegos/base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container">
+    <h1 class="text-center my-4">Sopa de Letras</h1>
+    
+    <div class="row">
+        <div class="col-md-8">
+            <div class="sopa-container mb-4">
+                <table id="sopa-table" class="table table-bordered text-center">
+                    <tr><td data-row="0" data-col="0">C</td><td data-row="0" data-col="1">A</td><td data-row="0" data-col="2">S</td><td data-row="0" data-col="3">A</td><td data-row="0" data-col="4">X</td><td data-row="0" data-col="5">Y</td><td data-row="0" data-col="6">Z</td></tr>
+                    <tr><td data-row="1" data-col="0">L</td><td data-row="1" data-col="1">E</td><td data-row="1" data-col="2">N</td><td data-row="1" data-col="3">T</td><td data-row="1" data-col="4">E</td><td data-row="1" data-col="5">J</td><td data-row="1" data-col="6">A</td></tr>
+                    <tr><td data-row="2" data-col="0">F</td><td data-row="2" data-col="1">O</td><td data-row="2" data-col="2">C</td><td data-row="2" data-col="3">O</td><td data-row="2" data-col="4">X</td><td data-row="2" data-col="5">Y</td><td data-row="2" data-col="6">Z</td></tr>
+                    <tr><td data-row="3" data-col="0">M</td><td data-row="3" data-col="1">A</td><td data-row="3" data-col="2">N</td><td data-row="3" data-col="3">Z</td><td data-row="3" data-col="4">A</td><td data-row="3" data-col="5">N</td><td data-row="3" data-col="6">A</td></tr>
+                    <tr><td data-row="4" data-col="0">P</td><td data-row="4" data-col="1">A</td><td data-row="4" data-col="2">N</td><td data-row="4" data-col="3">T</td><td data-row="4" data-col="4">O</td><td data-row="4" data-col="5">Y</td><td data-row="4" data-col="6">Z</td></tr>
+                    <tr><td data-row="5" data-col="0">X</td><td data-row="5" data-col="1">Y</td><td data-row="5" data-col="2">Z</td><td data-row="5" data-col="3">W</td><td data-row="5" data-col="4">Q</td><td data-row="5" data-col="5">Y</td><td data-row="5" data-col="6">Z</td></tr>
+                    <tr><td data-row="6" data-col="0">X</td><td data-row="6" data-col="1">Y</td><td data-row="6" data-col="2">Z</td><td data-row="6" data-col="3">W</td><td data-row="6" data-col="4">Q</td><td data-row="6" data-col="5">Y</td><td data-row="6" data-col="6">Z</td></tr>
+                </table>
+            </div>
+        </div>
+        
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h3>Palabras a encontrar</h3>
+                </div>
+                <div class="card-body">
+                    <ul id="palabras-list" class="list-group">
+                        <li class="list-group-item" data-palabra="CASA">CASA</li>
+                        <li class="list-group-item" data-palabra="LENTEJA">LENTEJA</li>
+                        <li class="list-group-item" data-palabra="FOCO">FOCO</li>
+                        <li class="list-group-item" data-palabra="MANZANA">MANZANA</li>
+                        <li class="list-group-item" data-palabra="PANTO">PANTO</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="mt-3">
+                <button id="empezar-btn" class="btn btn-primary btn-lg btn-block mb-2">Empezar</button>
+                <button id="verificar-btn" class="btn btn-info btn-lg btn-block mb-2" disabled>Verificar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<style>
+    .sopa-container {
+        background-color: white;
+        border-radius: 10px;
+        padding: 20px;
+        box-shadow: 0 0 15px rgba(0,0,0,0.1);
+    }
+    
+    #sopa-table td {
+        width: 40px;
+        height: 40px;
+        font-size: 1.2rem;
+        font-weight: bold;
+        cursor: pointer;
+        transition: all 0.3s;
+        text-align: center;
+    }
+    
+    #sopa-table td:hover {
+        background-color: #f0f0f0;
+    }
+    
+    .selected {
+        transform: scale(1.1);
+    }
+    
+    .palabra-encontrada {
+        text-decoration: line-through;
+        color: #28a745;
+        font-weight: bold;
+    }
+    
+    .incorrecta {
+        background-color: #ffcccc !important;
+    }
+    
+    .bg-seleccion {
+        background-color: #28a745 !important;
+        color: white !important;
+    }
+    
+    .palabra-terminada {
+        opacity: 0.7;
+    }
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    let seleccionadas = [];
+    let palabrasEncontradas = [];
+    let juegoIniciado = false;
+    
+    const palabrasPosiciones = {
+        "CASA": [[0,0],[0,1],[0,2],[0,3]],
+        "LENTEJA": [[1,0],[1,1],[1,2],[1,3],[1,4],[1,5],[1,6]],
+        "FOCO": [[2,0],[2,1],[2,2],[2,3]],
+        "MANZANA": [[3,0],[3,1],[3,2],[3,4],[3,5],[3,6]],
+        "PANTO": [[4,0],[4,1],[4,2],[4,3],[4,4]]
+    };
+    
+    const palabrasParaHablar = {
+        "CASA": "casa",
+        "LENTEJA": "lenteja",
+        "FOCO": "foco",
+        "MANZANA": "manzana",
+        "PANTO": "panto"
+    };
+    
+    const celdas = document.querySelectorAll('#sopa-table td');
+    const empezarBtn = document.getElementById('empezar-btn');
+    const verificarBtn = document.getElementById('verificar-btn');
+    
+    empezarBtn.addEventListener('click', function() {
+        juegoIniciado = true;
+        empezarBtn.disabled = true;
+        verificarBtn.disabled = false;
+        
+        Swal.fire({
+            title: '¡Comienza el juego!',
+            text: 'Selecciona letras contiguas para formar las palabras',
+            icon: 'info',
+            confirmButtonText: 'OK'
+        });
+    });
+    
+    celdas.forEach(celda => {
+        celda.addEventListener('click', function() {
+            if (!juegoIniciado) {
+                Swal.fire({
+                    title: 'Primero haz clic en Empezar',
+                    text: 'Debes iniciar el juego antes de seleccionar letras',
+                    icon: 'warning',
+                    confirmButtonText: 'Entendido'
+                });
+                return;
+            }
+            
+            const fila = parseInt(this.getAttribute('data-row'));
+            const col = parseInt(this.getAttribute('data-col'));
+            
+            if (!this.classList.contains('bg-seleccion') && !this.classList.contains('palabra-terminada')) {
+                this.classList.add('bg-seleccion', 'selected');
+                seleccionadas.push([fila, col]);
+                
+                verificarPalabra();
+            } else if (this.classList.contains('bg-seleccion')) {
+                seleccionadas = seleccionadas.filter(pos => !(pos[0] === fila && pos[1] === col));
+                this.classList.remove('bg-seleccion', 'selected');
+            }
+        });
+    });
+    
+    function verificarPalabra() {
+        let palabraEncontrada = null;
+        
+        for (const [palabra, posiciones] of Object.entries(palabrasPosiciones)) {
+            const posicionesStr = JSON.stringify(posiciones.sort());
+            const seleccionadasStr = JSON.stringify(seleccionadas.sort());
+            
+            if (posicionesStr === seleccionadasStr && !palabrasEncontradas.includes(palabra)) {
+                palabraEncontrada = palabra;
+                break;
+            }
+        }
+        
+        if (palabraEncontrada) {
+            palabrasEncontradas.push(palabraEncontrada);
+            
+            document.querySelector(`[data-palabra="${palabraEncontrada}"]`).classList.add('palabra-encontrada');
+            
+            seleccionadas.forEach(pos => {
+                const celda = document.querySelector(`[data-row="${pos[0]}"][data-col="${pos[1]}"]`);
+                celda.classList.add('palabra-terminada');
+            });
+            
+           
+            const textoParaHablar = palabrasParaHablar[palabraEncontrada] || palabraEncontrada;
+            const utterance = new SpeechSynthesisUtterance(textoParaHablar);
+            utterance.lang = 'es-ES';
+            utterance.rate = 0.9;
+            speechSynthesis.speak(utterance);
+            
+            Swal.fire({
+                title: '¡Correcto!',
+                text: `Has encontrado la palabra: ${palabraEncontrada}`,
+                icon: 'success',
+                confirmButtonText: 'OK'
+            });
+            
+            limpiarSeleccion();
+            
+            if (palabrasEncontradas.length === Object.keys(palabrasPosiciones).length) {
+                Swal.fire({
+                    title: '¡Felicidades!',
+                    text: '¡Has encontrado todas las palabras!',
+                    icon: 'success',
+                    confirmButtonText: 'OK'
+                });
+            }
+        }
+    }
+    
+    verificarBtn.addEventListener('click', function() {
+        const totalPalabras = Object.keys(palabrasPosiciones).length;
+        const encontradas = palabrasEncontradas.length;
+        
+        Swal.fire({
+            title: 'Progreso',
+            html: `Has encontrado <b>${encontradas}</b> de <b>${totalPalabras}</b> palabras.<br>
+                  ${totalPalabras - encontradas > 0 ? `Te faltan <b>${totalPalabras - encontradas}</b> palabras.` : ''}`,
+            icon: 'info',
+            confirmButtonText: 'OK'
+        });
+    });
+    
+    function limpiarSeleccion() {
+        celdas.forEach(celda => {
+            if (!celda.classList.contains('palabra-terminada')) {
+                celda.classList.remove('bg-seleccion', 'selected');
+            }
+        });
+        seleccionadas = [];
+    }
+});
+</script>
+{% endblock %}

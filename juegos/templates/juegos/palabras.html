@@ -1,0 +1,71 @@
+{% extends 'juegos/base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container">
+    <h1 class="text-center my-4">Forma la Palabra</h1>
+    
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card mb-4">
+                <div class="card-header bg-info text-white">
+                    <h3 class="mb-0">Ordena las Letras</h3>
+                </div>
+                <div class="card-body">
+                    <div class="text-center mb-4">
+                        <h2 id="letras-desordenadas" class="display-4"></h2>
+                    </div>
+                    
+                    <div class="form-group">
+                        <input type="text" id="respuesta-usuario" class="form-control form-control-lg" 
+                               placeholder="Escribe la palabra correcta">
+                    </div>
+                    
+                    <div class="text-center mt-3">
+                        <button id="verificar-btn" class="btn btn-primary btn-lg">Verificar</button>
+                    </div>
+                    
+                    <div id="resultado" class="mt-4 p-3 bg-light rounded" style="display:none;">
+                        <h4 class="text-center">Resultado</h4>
+                        <p id="mensaje-resultado" class="h5 text-center"></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const palabras = ["CIMA", "ROSA", "LUNA", "CAMA", "SOPA", "MIRA"];
+    const palabra = palabras[Math.floor(Math.random() * palabras.length)];
+    const letras = palabra.split('').sort(() => Math.random() - 0.5).join(' ');
+
+    const letrasDesordenadas = document.getElementById('letras-desordenadas');
+    const respuestaUsuario = document.getElementById('respuesta-usuario');
+    const verificarBtn = document.getElementById('verificar-btn');
+    const resultadoDiv = document.getElementById('resultado');
+    const mensajeResultado = document.getElementById('mensaje-resultado');
+    
+    letrasDesordenadas.textContent = letras;
+
+    verificarBtn.addEventListener('click', function() {
+        const respuesta = respuestaUsuario.value.trim().toUpperCase();
+
+        if (respuesta === palabra) {
+            mensajeResultado.textContent = "¡Correcto! 🎉";
+            mensajeResultado.className = "text-success text-center h4";
+            
+            const utterance = new SpeechSynthesisUtterance(palabra);
+            utterance.lang = 'es-ES';
+            speechSynthesis.speak(utterance);
+        } else {
+            mensajeResultado.textContent = `Incorrecto, la palabra correcta era: ${palabra}`;
+            mensajeResultado.className = "text-danger text-center h4";
+        }
+
+        resultadoDiv.style.display = "block";
+    });
+});
+</script>
+{% endblock %}
